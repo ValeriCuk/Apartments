@@ -20,9 +20,9 @@ public class Main {
             while (true) {
                 System.out.println("1: add new apartment");
                 System.out.println("2: add random apartments");
-                System.out.println("3: delete client");
-                System.out.println("4: change client");
-                System.out.println("5: view clients");
+                System.out.println("3: delete apartment");
+                System.out.println("4: change apartment");
+                System.out.println("5: view apartments");
                 System.out.print("-> ");
 
                 String s = scanner.nextLine();
@@ -34,10 +34,10 @@ public class Main {
                         insertRandomApartments(scanner);
                         break;
                     case "3":
-//                        deleteClient(sc);
+                        deleteApartment(scanner);
                         break;
                     case "4":
-//                        changeClient(sc);
+                        changeApartment(scanner);
                         break;
                     case "5":
                         viewTable();
@@ -129,7 +129,7 @@ public class Main {
                     Address address = new Address("City", "Street ", (10 + i), (i+1));
                     preparedStatement.setString(2, address.toString());//ADDRESS
                     preparedStatement.setDouble(3, rnd.nextDouble(13.0, 170.0));//AREA
-                    preparedStatement.setInt(4, rnd.nextInt(1, 4));//BADROOMS
+                    preparedStatement.setInt(4, rnd.nextInt(1, 4));//BEDROOMS
                     preparedStatement.setInt(5, rnd.nextInt(20000, 100000));//PRICE
                     preparedStatement.executeUpdate();
                 }
@@ -141,6 +141,90 @@ public class Main {
             }
         }finally {
             connection.setAutoCommit(true);
+        }
+    }
+
+    private static void deleteApartment(Scanner scanner) throws SQLException{
+        System.out.print("Enter apartments id: ");
+        int id = Integer.parseInt(scanner.nextLine());
+        try (PreparedStatement preparedStatement = connection.prepareStatement("DELETE FROM Apartments WHERE id = ?")){
+            preparedStatement.setInt(1, id);
+            preparedStatement.executeUpdate();
+        }
+    }
+
+    private static void changeApartment(Scanner scanner) throws SQLException{
+        System.out.print("Enter apartments id for change: ");
+        int id = Integer.parseInt(scanner.nextLine());
+        showApartmentBy(id);
+        System.out.print("What would you like to change? ");
+        System.out.println("1: Region");
+        System.out.println("2: Address");
+        System.out.println("3: Area");
+        System.out.println("4: Bedrooms");
+        System.out.println("5: Price");
+        System.out.print("-> ");
+
+        String s = scanner.nextLine();
+        switch (s) {
+            case "1":
+                System.out.print("New region: ");
+                String newRegion = scanner.nextLine();
+                updateApartmentBy(id, "region", newRegion);
+                break;
+            case "2":
+                //City, 10 Street, Apt 1 TODO: change address
+                break;
+            case "3":
+                System.out.print("New area: ");
+                String newArea = scanner.nextLine();
+                updateApartmentBy(id, "area", newArea);
+                break;
+            case "4":
+                System.out.print("New bedrooms: ");
+                String newBedrooms = scanner.nextLine();
+                updateApartmentBy(id, "bedrooms", newBedrooms);
+                break;
+            case "5":
+                viewTable();
+                break;
+            default:
+                return;
+        }
+    }
+
+    private static <T> void updateApartmentBy(int id, String param, T value) throws SQLException{
+            String query = "UPDATE Apartments SET " + param + " = ? WHERE id = ?";
+        try(PreparedStatement preparedStatement = connection.prepareStatement(query)){
+            if (value instanceof String) {
+                preparedStatement.setString(1, (String) value);
+            } else if (value instanceof Integer) {
+                preparedStatement.setInt(1, (Integer) value);
+            } else if (value instanceof Double) {
+                preparedStatement.setDouble(1, (Double) value);
+            } else {
+                throw new IllegalArgumentException("Unsupported type: " + value.getClass().getSimpleName());
+            }
+            preparedStatement.setInt(2, id);
+            preparedStatement.executeUpdate();
+        }
+    }
+
+    private static void showApartmentBy(int id) throws SQLException{
+        try(PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM Apartments WHERE id = ?")){
+            preparedStatement.setInt(1, id);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) { // Перевіряємо, чи є запис
+                System.out.println("Apartment found:");
+                System.out.println("\tID: " + resultSet.getInt("id"));
+                System.out.println("\tRegion: " + resultSet.getString("region"));
+                System.out.println("\tAddress: " + resultSet.getString("adress"));
+                System.out.println("\tArea: " + resultSet.getDouble("area"));
+                System.out.println("\tRooms: " + resultSet.getInt("bedrooms"));
+                System.out.println("\tPrice: " + resultSet.getInt("price"));
+            } else {
+                System.out.println("Apartment with ID " + id + " not found.");
+            }
         }
     }
 

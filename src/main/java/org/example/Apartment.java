@@ -22,11 +22,11 @@ public class Apartment {
 
     @Override
     public String toString() {
-        return "ID" + id +
+        return "ID_" + id +
                 ", " + region + " region, " +
                 address.toString() +
                 ", " + area + "m²" +
-                ", " + bedrooms + " bedroom" +
+                ", " + bedrooms + "-bedroom" +
                 ", " + price + "$";
     }
 }

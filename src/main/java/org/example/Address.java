@@ -28,15 +28,12 @@ public class Address {
     }
 
     public void fromString(String addressString) {
-        System.out.println(addressString);
         String[] parts = addressString.split(", ");
-        System.out.println("Array: " + Arrays.toString(parts));
         String city = parts[0].trim();
         this.city = city;
 
         String streetAndNumber = parts[1];
         String[] streetParts = streetAndNumber.split(" ");
-        System.out.println(Arrays.toString(streetParts));
         String street = streetParts[1];
         int houseNumber = Integer.parseInt(streetParts[0]);
         this.street = street;
